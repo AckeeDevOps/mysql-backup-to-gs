@@ -2,6 +2,7 @@
 set -eo pipefail
 
 backup_tool="gsutil"
+backup_options="rsync -r"
 
 # verify variables
 if [ -z "$GS_ACCESS_KEY" -o -z "$GS_SECRET_KEY" -o -z "$GS_URL" -o -z "$MYSQL_HOST" -o -z "$MYSQL_PORT" ]; then
@@ -30,7 +31,7 @@ PASSWORD="$MYSQL_ROOT_PASSWORD"
    echo "PASSWORD set to MYSQL_PASSWORD. USER is $MYSQL_USER" && USER="$MYSQL_USER"
 
 # add a cron job
-echo "$CRON_SCHEDULE root rm -rf /tmp/dump* && mysqldump -u $USER -p'$PASSWORD' --all-databases --single-transaction --force -h "$MYSQL_HOST" -P "$MYSQL_PORT" --result-file=/tmp/dump.sql --verbose >> /var/log/cron.log 2>&1 && gzip -c /tmp/dump.sql > /tmp/dump && $backup_tool mv /tmp/dump gs://$GS_URL/ >> /var/log/cron.log 2>&1 && rm -rf /tmp/dump*" >> /etc/crontab
+echo "$CRON_SCHEDULE root rm -rf /tmp/dump* && mysqldump -u $USER -p'$PASSWORD' --all-databases --single-transaction --force -h "$MYSQL_HOST" -P "$MYSQL_PORT" --result-file=/tmp/dump.sql --verbose >> /var/log/cron.log 2>&1 && gzip -c /tmp/dump.sql > /tmp/dump && $backup_tool $backup_options /tmp/dump gs://$GS_URL/ >> /var/log/cron.log 2>&1 && rm -rf /tmp/dump*" >> /etc/crontab
 crontab /etc/crontab
 
 exec "$@"
