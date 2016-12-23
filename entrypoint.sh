@@ -31,7 +31,7 @@ PASSWORD="$MYSQL_ROOT_PASSWORD"
    echo "PASSWORD set to MYSQL_PASSWORD. USER is $MYSQL_USER" && USER="$MYSQL_USER"
 
 # add a cron job
-echo "$CRON_SCHEDULE root rm -rf /tmp/backup/* && mysqldump -u $USER -p'$PASSWORD' --all-databases --single-transaction --force -h "$MYSQL_HOST" -P "$MYSQL_PORT" --result-file=/tmp/backup/dump.sql --verbose >> /var/log/cron.log 2>&1 && gzip -c /tmp/backup/dump.sql > /tmp/backup/dump.gz && $backup_tool $backup_options /tmp/backup/ gs://$GS_URL/ >> /var/log/cron.log 2>&1" >> /etc/crontab
+echo "$CRON_SCHEDULE root mkdir -p /tmp/backup ; rm -rf /tmp/backup/* && mysqldump -u $USER -p'$PASSWORD' --all-databases --single-transaction --force -h "$MYSQL_HOST" -P "$MYSQL_PORT" --result-file=/tmp/backup/dump.sql --verbose >> /var/log/cron.log 2>&1 && gzip -c /tmp/backup/dump.sql > /tmp/backup/dump.gz && $backup_tool $backup_options /tmp/backup/ gs://$GS_URL/ >> /var/log/cron.log 2>&1" >> /etc/crontab
 crontab /etc/crontab
 
 exec "$@"
