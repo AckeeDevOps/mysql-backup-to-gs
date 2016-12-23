@@ -18,8 +18,8 @@ fi
 # set gs config
 echo -e "[Credentials]\ngs_access_key_id = $GS_ACCESS_KEY\ngs_secret_access_key = $GS_SECRET_KEY" > /root/.boto
 
-# verify gs config
-$backup_tool ls "gs://$GS_URL" > /dev/null
+# verify gs config - ls bucket
+$backup_tool ls "gs://${GS_URL%%/*}" > /dev/null
 
 # set cron schedule TODO: check if the string is valid (five or six values separated by white space)
 [[ -z "$CRON_SCHEDULE" ]] && CRON_SCHEDULE='0 2 * * *' && \
