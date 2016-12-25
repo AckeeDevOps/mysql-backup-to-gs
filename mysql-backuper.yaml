@@ -1,0 +1,55 @@
+#
+# MySQL / MariaDB backuper
+#
+# Set proper MYSQL_ROOT_PASSWORD, GS_ACCESS_KEY, GS_SECRET_KEY, GS_URL
+#
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: APP_NAME-mysql-backuper
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: APP_NAME-mysql-backuper
+        role: client
+        tier: backend
+    spec:
+      containers:
+      - name: APP_NAME-mysql-backuper
+        image: ackee/mysql-backup-to-gs:latest
+        env:
+        # TimeZone for proper cron scheduling execution
+        - name: TZ
+          value: "Europe/Prague"
+        - name: MYSQL_ROOT_PASSWORD
+          value: "ENTER_PASSWORD"
+        # mysql/maria host container domain name
+        - name: MYSQL_HOST
+          value: "mariadb"
+        - name: MYSQL_USER
+          value: "ENTER_USER"
+        # Google Cloud Storage credentials
+        - name: GS_ACCESS_KEY
+          value: "ENTER_GS_ACCESS_KEY"
+        - name: GS_SECRET_KEY
+          value: "ENTER_GS_SECRET_KEY"
+        - name: GS_URL
+          value: "bucket-name/PROJECT_NAME/APP_NAME/ENV_NAME/mysql"
+        - name: MYSQL_PORT
+          value: "3306"
+        # You might want to tweak the resources a bit according to the size of your db
+        resources:
+          requests:
+            cpu: 1m
+            memory: 8Mi
+          limits: 
+            cpu: 5m
+            memory: 64Mi
+        ports:
+          - containerPort: 3306
+      # allow to run only on certain cluster node
+      nodeSelector:
+        cloud.google.com/gke-nodepool: default-pool
