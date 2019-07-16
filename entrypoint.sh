@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 set -eo pipefail
 
 backup_tool="/google-cloud-sdk/bin/gsutil"
