@@ -7,16 +7,7 @@ Following ENV variables must be specified:
   - `mysql.domain.com`
  - `MYSQL_PORT` contains the remote port number for mysqldump option -P
   - `3306` 
- - `MYSQL_ROOT_PASSWORD` password of user `root` who has access to all dbs. Default value is the value of `MYSQL_PASSWORD`
- - `MYSQL_USER` mysql user, default: `root`
+ - `MYSQL_PASSWORD` password of user who has read access to all dbs.
+ - `MYSQL_USER` mysql user
  - `GS_URL` contains address in GS where to store backups, without the `gs://` url prefix
   - `bucket-name/directory`
- - `GS_ACCESS_KEY`
- - `GS_SECRET_KEY`
- - `CRON_SCHEDULE` cron schedule string, default '0 2 * * *'
- 
- TODO:
-  - better input checking (+ default values)
-  - mysqldump options as ENV variables
-  - dump file name as ENV variable
-
