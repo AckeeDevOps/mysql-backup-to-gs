@@ -17,6 +17,6 @@ echo "Google storage bucket access verified."
 
 mkdir -p /tmp/backup/
 rm -rf -- /tmp/backup/* 
-mysqldump -u $MYSQL_USER -p'$MYSQL_PASSWORD' --all-databases --single-transaction -h "$MYSQL_HOST" -P "$MYSQL_PORT"--result-file=/tmp/backup/dump.sql --verbose && gzip /tmp/backup/dump.sql
+mysqldump -u $MYSQL_USER -p'$MYSQL_PASSWORD' --all-databases --single-transaction -h "$MYSQL_HOST" -P "$MYSQL_PORT" --result-file=/tmp/backup/dump.sql --verbose && gzip /tmp/backup/dump.sql
 
 $backup_tool $backup_options /tmp/backup/ gs://$GS_URL/ 
