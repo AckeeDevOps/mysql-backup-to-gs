@@ -1,5 +1,5 @@
 #!/bin/bash -x
-set -eo pipefail
+#set -eo pipefail
 
 backup_tool="/google-cloud-sdk/bin/gsutil"
 backup_options="-m rsync -r"
@@ -23,6 +23,8 @@ echo "Google storage bucket access verified."
 mkdir -p /tmp/backup/
 rm -rf -- /tmp/backup/* 
 mysqldump -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" --all-databases --single-transaction -h "$MYSQL_HOST" -P "$MYSQL_PORT" --result-file=/tmp/backup/dump.sql --verbose $FORCE
+echo $?
 gzip /tmp/backup/dump.sql
+echo $?
 
 $backup_tool $backup_options /tmp/backup/ gs://$GS_URL/ 
