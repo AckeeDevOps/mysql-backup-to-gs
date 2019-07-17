@@ -1,5 +1,4 @@
-#!/bin/bash -x
-#set -eo pipefail
+#!/bin/bash
 
 backup_tool="/google-cloud-sdk/bin/gsutil"
 backup_options="-m rsync -r"
@@ -14,6 +13,7 @@ fi
 FORCE=""
 if [ ! -z "$MYSQL_DUMP_FORCE" ]; then
   FORCE="--force"
+  set -eo pipefail # if we do not force, we want clean exit codes on mysqldump command
 fi
 
 # verify gs config - ls bucket
@@ -22,9 +22,11 @@ echo "Google storage bucket access verified."
 
 mkdir -p /tmp/backup/
 rm -rf -- /tmp/backup/* 
-mysqldump -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" --all-databases --single-transaction -h "$MYSQL_HOST" -P "$MYSQL_PORT" --result-file=/tmp/backup/dump.sql --verbose $FORCE
-echo $?
-gzip /tmp/backup/dump.sql
+
+candidates=$(echo "show databases" | mysql -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" -h "$MYSQL_HOST" -P "$MYSQL_PORT" | grep -Ev "^(Database|sys|performance_schema|information_schema)$")
+
+mysqldump -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" --databases $candidates --single-transaction -h "$MYSQL_HOST" -P "$MYSQL_PORT" --result-file=/tmp/backup/dump.sql --verbose $FORCE
 echo $?
 
+gzip /tmp/backup/dump.sql
 $backup_tool $backup_options /tmp/backup/ gs://$GS_URL/ 
