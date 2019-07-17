@@ -13,6 +13,7 @@ fi
 FORCE=""
 if [ ! -z "$MYSQL_DUMP_FORCE" ]; then
   FORCE="--force"
+else
   set -eo pipefail # if we do not force, we want clean exit codes on mysqldump command
 fi
 
