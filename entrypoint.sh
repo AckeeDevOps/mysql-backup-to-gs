@@ -29,5 +29,7 @@ candidates=$(echo "show databases" | mysql -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" 
 mysqldump -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" --databases $candidates --single-transaction -h "$MYSQL_HOST" -P "$MYSQL_PORT" --result-file=/tmp/backup/dump.sql --verbose $FORCE
 echo $?
 
-gzip /tmp/backup/dump.sql
+echo "export done, now gzip output and transfer it to GCS"
+
+gzip -v /tmp/backup/dump.sql
 $backup_tool $backup_options /tmp/backup/ gs://$GS_URL/ 
