@@ -17,7 +17,7 @@ else
   set -eo pipefail # if we do not force, we want clean exit codes on mysqldump command
 fi
 
-if [! -z "$GOOGLE_APPLICATION_CREDENTIALS"]; then
+if [ ! -z "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
   /google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
 fi
 
