@@ -17,12 +17,16 @@ else
   set -eo pipefail # if we do not force, we want clean exit codes on mysqldump command
 fi
 
+if [! -z "$GOOGLE_APPLICATION_CREDENTIALS"]; then
+  /google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+fi
+
 # verify gs config - ls bucket
 $backup_tool ls "gs://${GS_URL%%/*}" > /dev/null
 echo "Google storage bucket access verified."
 
 mkdir -p /tmp/backup/
-rm -rf -- /tmp/backup/* 
+rm -rf -- /tmp/backup/*
 
 candidates=$(echo "show databases" | mysql -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" -h "$MYSQL_HOST" -P "$MYSQL_PORT" | grep -Ev "^(Database|sys|performance_schema|information_schema)$")
 
@@ -32,4 +36,4 @@ echo $?
 echo "export done, now gzip output and transfer it to GCS"
 
 gzip -v /tmp/backup/dump.sql
-$backup_tool $backup_options /tmp/backup/ gs://$GS_URL/ 
+$backup_tool $backup_options /tmp/backup/ gs://$GS_URL/
