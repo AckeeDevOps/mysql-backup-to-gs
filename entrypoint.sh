@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eo pipefail
 
 backup_tool="/google-cloud-sdk/bin/gsutil"
 backup_options="-m rsync -r"
@@ -20,10 +21,6 @@ fi
 if [ ! -z "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
   /google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
 fi
-
-# verify gs config - ls bucket
-$backup_tool ls "gs://${GS_URL%%/*}" > /dev/null
-echo "Google storage bucket access verified."
 
 mkdir -p /tmp/backup/
 rm -rf -- /tmp/backup/*
