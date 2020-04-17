@@ -1,5 +1,4 @@
 #!/bin/bash
-set -eo pipefail
 
 backup_tool="/google-cloud-sdk/bin/gsutil"
 backup_options="-m rsync -r"
@@ -15,7 +14,7 @@ FORCE=""
 if [ ! -z "$MYSQL_DUMP_FORCE" ]; then
   FORCE="--force"
 else
-  set -eo pipefail # if we do not force, we want clean exit codes on mysqldump command
+  set -euo pipefail # if we do not force, we want clean exit codes on mysqldump command
 fi
 
 if [ ! -z "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
@@ -25,12 +24,17 @@ fi
 mkdir -p /tmp/backup/
 rm -rf -- /tmp/backup/*
 
-candidates=$(echo "show databases" | mysql -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" -h "$MYSQL_HOST" -P "$MYSQL_PORT" | grep -Ev "^(Database|sys|performance_schema|information_schema)$")
-
-mysqldump -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" --databases $candidates --single-transaction -h "$MYSQL_HOST" -P "$MYSQL_PORT" --result-file=/tmp/backup/dump.sql --verbose $FORCE
-echo $?
+for i in `echo "show databases" | mysql -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" -h "$MYSQL_HOST" -P "$MYSQL_PORT" | grep -Ev "^(Database|sys|performance_schema|information_schema|$MYSQL_IGNORE_DBS)$"`; do
+  echo $i
+  mysqldump -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" --databases $i --single-transaction -h "$MYSQL_HOST" -P "$MYSQL_PORT" --result-file=/tmp/backup/${i}_dump.sql --verbose $FORCE || echo "${i} database backup has failed!" >> /tmp/fails
+  gzip -v /tmp/backup/${i}_dump.sql || true
+done
 
 echo "export done, now gzip output and transfer it to GCS"
 
-gzip -v /tmp/backup/dump.sql
 $backup_tool $backup_options /tmp/backup/ gs://$GS_URL/
+
+if [ -f /tmp/fails ]; then
+  cat /tmp/fails
+  exit 1
+fi
