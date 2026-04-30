@@ -1,4 +1,4 @@
-FROM mysql:5.7
+FROM mysql:9.7
 
 # backups to Google Storage
 RUN    apt-get update \
